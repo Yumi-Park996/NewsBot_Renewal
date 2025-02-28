@@ -35,6 +35,6 @@ jobs:
       run: ls -lah target/
 
     - name: Run Newsletter App
-      run: java -Dfile.encoding=UTF-8 -jar target/ex05-1.0-SNAPSHOT-shaded.jar
+      run: java -Dfile.encoding=UTF-8 -jar target/ex05-1.0-SNAPSHOT.jar
 
 
