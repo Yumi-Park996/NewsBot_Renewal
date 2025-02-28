@@ -31,11 +31,11 @@
 
     <build>
         <plugins>
-            <!-- 컴파일러 플러그인 (source/target 17) -->
+            <!-- Maven Compiler Plugin (컴파일 설정) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -49,7 +49,7 @@
                 <version>3.4.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>  <!-- 여기 중요! -->
+                        <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
@@ -57,7 +57,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>app.AppNews</mainClass>
-                                </transformers>
+                                </transformer>
                             </transformers>
                         </configuration>
                     </execution>
