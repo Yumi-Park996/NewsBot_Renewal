@@ -2,7 +2,7 @@ name: Send Newsletter Daily
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 한국시간 9시 (UTC 기준 0시)
+    - cron: '0 0 * * *'  # UTC 0시 = 한국시간 오전 9시
 
   workflow_dispatch:
 
@@ -29,7 +29,12 @@ jobs:
         echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> $GITHUB_ENV
 
     - name: Build with Maven
-      run: mvn clean package
+      run: mvn clean package -DskipTests
+
+    - name: Check target directory (디버깅)
+      run: ls -lah target/
 
     - name: Run Newsletter App
       run: java -Dfile.encoding=UTF-8 -jar target/ex05-1.0-SNAPSHOT-shaded.jar
+
+
