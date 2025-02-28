@@ -1,3 +1,6 @@
+![image](https://github.com/user-attachments/assets/83ca7e87-046c-41f4-9d0d-9d5fbb703a75)
+
+
 **The NewsBot_Renewal project is a Java-based application designed to automate the process of fetching and delivering news updates. It utilizes the Maven build system and includes a GitHub Actions workflow for continuous integration and deployment.**
 
 **Key Features:**
