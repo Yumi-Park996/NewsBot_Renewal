@@ -43,3 +43,5 @@ application.properties
 *.iml
 
 .env
+
+load-env.ps1
