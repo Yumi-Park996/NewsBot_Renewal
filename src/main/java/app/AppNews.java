@@ -63,7 +63,10 @@ public class AppNews {
         try {
             List<String> recipients = List.of(
                     "byumm315@gmail.com",
-                    "byumm315@naver.com"
+                    "byumm315@naver.com",
+                    "jungwon1998@naver.com",
+                    "yuyumam3@naver.com",
+                    "umipapa@daum.net"
             );
 
             NewsletterSender.sendNewsletterDirect(
