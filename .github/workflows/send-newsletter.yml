@@ -32,4 +32,4 @@ jobs:
       run: mvn clean package
 
     - name: Run Newsletter App
-      run: java -cp target/ex05-1.0-SNAPSHOT.jar app.AppNews
+      run: java -Dfile.encoding=UTF-8 -jar target/ex05-1.0-SNAPSHOT-shaded.jar
