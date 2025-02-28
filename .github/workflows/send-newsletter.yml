@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 0 * * *'  # 한국시간 9시 (UTC 기준 0시)
 
+  workflow_dispatch:
+
 jobs:
   send-newsletter:
     runs-on: ubuntu-latest
