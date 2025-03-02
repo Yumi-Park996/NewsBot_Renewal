@@ -102,47 +102,67 @@ public class LLMProcessor {  // Gemini API 호출 및 프롬프트 생성 담당
                 "투자 꿀팁:";
     }
 
-    // Gemini API 호출 메서드
-    public String callGemini(String prompt) {
-        System.out.println("🔎 Gemini 요청 프롬프트:\n" + prompt);  // 프롬프트 출력 로그
+// Gemini API 호출 메서드 (프롬프트를 넘겨주고, 응답 결과를 문자열로 반환하는 역할)
+public String callGemini(String prompt) {
+    // 1. 요청 프롬프트 로그 출력 (실제 요청 전에 프롬프트가 잘 만들어졌는지 확인용)
+    System.out.println("🔎 Gemini 요청 프롬프트:\n" + prompt);
 
-        if (geminiApiKey == null) {  // API 키 없을 경우 에러 메시지 반환
-            return "환경 변수 GEMINI_API_KEY가 설정되지 않았습니다.";
-        }
-
-        // 요청 본문 구성 (프롬프트 포함 JSON 생성)
-        String requestBody = """
-                {
-                    "contents": [
-                        {"parts": [{"text": "%s"}]}
-                    ]
-                }
-                """.formatted(escapeJson(prompt));
-
-        // HTTP 클라이언트 및 요청 객체 생성
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl))  // 요청 URL 지정
-                .header("Content-Type", "application/json")  // 헤더 설정
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))  // POST 요청 및 본문 설정
-                .build();
-
-        try {
-            // 요청 전송 및 응답 수신
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("✅ 응답 상태코드: " + response.statusCode());  // 상태코드 출력
-
-            if (response.statusCode() == 200) {  // 성공 응답일 경우
-                return extractTextFromGeminiResponse(response.body());  // 응답 본문에서 텍스트 추출 및 반환
-            } else {  // 실패 응답일 경우
-                System.out.println("❌ 응답 본문: " + response.body());  // 에러 응답 출력
-                return "오류: " + response.statusCode();  // 상태코드 포함 오류 메시지 반환
-            }
-        } catch (Exception e) {  // 요청 중 예외 발생 시
-            e.printStackTrace();  // 예외 내용 출력
-            return "예외 발생: " + e.getMessage();  // 예외 메시지 반환
-        }
+    // 2. 환경 변수로부터 불러온 API 키가 없을 경우, 에러 메시지 반환
+    if (geminiApiKey == null) {
+        return "환경 변수 GEMINI_API_KEY가 설정되지 않았습니다.";  // 사전에 API 키 설정 필요
     }
+
+    // 3. Gemini API에 보낼 요청 본문 (JSON 문자열) 구성
+    //    - "contents" 배열 안에 "parts" 배열이 있고, 그 안에 "text" 필드로 프롬프트 내용 포함
+    //    - 예: {"contents": [{"parts": [{"text": "여기에 프롬프트 내용"}]}]}
+    //    - 프롬프트 내용은 escapeJson()으로 특수문자 이스케이프 처리 (아래 참고)
+    String requestBody = """
+            {
+                "contents": [
+                    {"parts": [{"text": "%s"}]}
+                ]
+            }
+            """.formatted(escapeJson(prompt));  // 프롬프트 삽입 (formatted()로 문자열 대체)
+
+    // 4. HTTP 클라이언트 생성
+    //    - HttpClient는 HTTP 요청을 보내고 응답을 받을 때 사용하는 표준 객체
+    HttpClient client = HttpClient.newHttpClient();
+
+    // 5. HTTP 요청 객체 구성
+    //    - 요청 URL: Gemini API 엔드포인트
+    //    - 요청 헤더: "Content-Type"을 "application/json"으로 설정 (JSON 요청임을 명시)
+    //    - 요청 방식: POST (본문에 데이터 포함)
+    //    - 요청 본문: 위에서 만든 JSON 문자열 (requestBody)
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(apiUrl))  // 요청 보낼 대상 URL 설정
+            .header("Content-Type", "application/json")  // 요청 본문이 JSON임을 지정
+            .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))  // 본문 데이터 설정
+            .build();
+
+    try {
+        // 6. HTTP 요청 전송 및 응답 수신
+        //    - client.send(): 동기 방식으로 요청을 보내고 응답을 바로 받음
+        //    - 응답 본문은 문자열로 받음 (HttpResponse.BodyHandlers.ofString())
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // 7. 응답 상태코드 출력 (성공: 200, 오류면 다른 값 나옴)
+        System.out.println("✅ 응답 상태코드: " + response.statusCode());
+
+        // 8. 상태코드가 200인 경우 (성공) - 응답 본문에서 필요한 텍스트만 추출
+        if (response.statusCode() == 200) {
+            // 응답 JSON에서 실제 요약/응답 텍스트 부분만 추출하는 메서드 호출
+            return extractTextFromGeminiResponse(response.body());
+        } else {
+            // 9. 상태코드가 200이 아니면 에러 로그 출력 및 오류 메시지 반환
+            System.out.println("❌ 응답 본문: " + response.body());  // 에러 원인 확인을 위한 로그 출력
+            return "오류: " + response.statusCode();  // 상태코드 포함한 오류 메시지 반환
+        }
+    } catch (Exception e) {
+        // 10. 요청 과정에서 네트워크 오류 등 예외 발생 시, 예외 메시지 반환
+        e.printStackTrace();  // 예외 정보 콘솔 출력
+        return "예외 발생: " + e.getMessage();  // 예외 메시지 반환
+    }
+}
 
     // Gemini 응답에서 텍스트 추출하는 메서드
     private String extractTextFromGeminiResponse(String json) {
