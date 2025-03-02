@@ -50,27 +50,3 @@ public class NewsItem {  // 뉴스 기사를 나타내는 데이터 모델 클�
     // Gemini 요약 저장 (외부에서 생성한 요약을 저장할 때 사용)
     public void setSummary(String summary) { this.summary = summary; }
 }
-
-
-/* 객체 <-> 문자열 변환 이유
-1. 네이버 뉴스 API는 자바 객체로 응답하지 않음
-* 네이버 뉴스 API는 자바 객체가 아니라 "JSON 문자열"로 응답을 줘요.
-* 즉, 네이버는 "자바스럽게" 주는 게 아니라, 표준 데이터 포맷인 JSON으로 주는 거예요.
-* 자바에서는 JSON을 바로 List<NewsItem>처럼 쓸 수 없어요.
-* 따라서, JSON 문자열을 자바에서 다룰 수 있는 형태로 변환하는 과정이 필수적입니다.
-2. 자바는 JSON을 직접 다룰 수 없음 (파싱 필요)
-* 자바는 JSON을 기본적으로 이해하지 못해요.
-* 따라서 Gson, Jackson, JsonParser 같은 라이브러리를 통해 JSON 문자열을 자바 객체로 변환해야 해요.
-* 지금 코드에서는 JsonParser와 NewsItem을 활용해서
-* "JSON 문자열" → "JsonObject" → "NewsItem"으로 바꾸는 흐름을 타는 거죠.
-3. 자바 객체로 바꾸면 다루기 편함
-* 네이버 응답 JSON을 그대로 쓰면, 코드가 이런 식으로 길어져요:
-```java
-jsonObject.getAsJsonArray("items").get(0).getAsJsonObject().get("title").getAsString()
-```
-* 그런데 NewsItem 객체로 만들어두면, 이렇게 편하게 다룰 수 있어요:
-```java
-newsItem.getTitle()
-```
-* 결국, "JSON은 전달받을 때만 필요하고, 실제 작업할 때는 자바 객체로 다루는 게 훨씬 편하기 때문입니다.
-*/
