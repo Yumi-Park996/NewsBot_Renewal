@@ -112,7 +112,7 @@ public String callGemini(String prompt) {
         return "환경 변수 GEMINI_API_KEY가 설정되지 않았습니다.";  // 사전에 API 키 설정 필요
     }
 
-    // 3. Gemini API에 보낼 요청 본문 (JSON 문자열) 구성
+    // 3. Gemini API에 보낼 요청 본문 (JSON 형태) 구성
     //    - "contents" 배열 안에 "parts" 배열이 있고, 그 안에 "text" 필드로 프롬프트 내용 포함
     //    - 예: {"contents": [{"parts": [{"text": "여기에 프롬프트 내용"}]}]}
     //    - 프롬프트 내용은 escapeJson()으로 특수문자 이스케이프 처리 (아래 참고)
@@ -131,8 +131,7 @@ public String callGemini(String prompt) {
     // 5. HTTP 요청 객체 구성
     //    - 요청 URL: Gemini API 엔드포인트
     //    - 요청 헤더: "Content-Type"을 "application/json"으로 설정 (JSON 요청임을 명시)
-    //    - 요청 방식: POST (본문에 데이터 포함)
-    //    - 요청 본문: 위에서 만든 JSON 문자열 (requestBody)
+    //    - 요청 방식: POST (문자열로 된 본문(requestBody)을 UTF-8로 인코딩해서 전송)
     HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(apiUrl))  // 요청 보낼 대상 URL 설정
             .header("Content-Type", "application/json")  // 요청 본문이 JSON임을 지정
@@ -142,6 +141,8 @@ public String callGemini(String prompt) {
     try {
         // 6. HTTP 요청 전송 및 응답 수신
         //    - client.send(): 동기 방식으로 요청을 보내고 응답을 바로 받음
+        //    - HttpClient.send()는 요청을 보내서 응답을 받는 기능만 담당하고,
+        //    - "응답 body를 어떤 형식으로 읽을지"는 개발자가 직접 정해줘야 한다.
         //    - 응답 본문은 문자열로 받음 (HttpResponse.BodyHandlers.ofString())
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
